@@ -1,4 +1,4 @@
-<!-- 업데이트 시점: 2026-11-22 23:23 KST -->
+<!-- 업데이트 시점: 2026-11-23 00:01 KST -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -39,13 +39,6 @@
   </script>
 </head>
 <body class="cyberpunk-study">
-  <div class="local-preview-label">
-    <span class="preview-label-copy">RESEARCH ATLAS <i>·</i> KAIST</span>
-    <div class="preview-controls">
-      <button class="scan-toggle" id="ambient-toggle" type="button" aria-pressed="true">Ambient light: on</button>
-      <button class="scan-toggle" id="motion-toggle" type="button" aria-pressed="false">Reduce motion: off</button>
-    </div>
-  </div>
   <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
   <header class="site-header">
     <a class="wordmark" href="#top">Jiyoung Mo</a>
@@ -156,26 +149,10 @@
     (() => {
       const root = document.documentElement;
       const body = document.body;
-      const ambientToggle = document.getElementById("ambient-toggle");
-      const motionToggle = document.getElementById("motion-toggle");
       const progress = document.getElementById("scroll-progress");
       const status = document.getElementById("interaction-status");
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
       body.classList.add("enhanced");
-
-      ambientToggle.addEventListener("click", () => {
-        const enabled = ambientToggle.getAttribute("aria-pressed") !== "true";
-        ambientToggle.setAttribute("aria-pressed", String(enabled));
-        ambientToggle.textContent = `Ambient light: ${enabled ? "on" : "off"}`;
-        body.classList.toggle("ambient-off", !enabled);
-      });
-
-      motionToggle.addEventListener("click", () => {
-        const enabled = motionToggle.getAttribute("aria-pressed") !== "true";
-        motionToggle.setAttribute("aria-pressed", String(enabled));
-        motionToggle.textContent = `Reduce motion: ${enabled ? "on" : "off"}`;
-        body.classList.toggle("still-mode", enabled);
-      });
 
       const researchCards = [...document.querySelectorAll(".research-card")];
       const atlasNodes = [...document.querySelectorAll(".atlas-node")];
