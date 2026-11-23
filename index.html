@@ -1,4 +1,4 @@
-<!-- 업데이트 시점: 2026-11-23 16:02 KST -->
+<!-- 업데이트 시점: 2026-11-23 15:44 KST -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -299,7 +299,7 @@
       }, { capture: true, passive: true });
 
       document.addEventListener("keydown", (event) => {
-        if (ambientEnabled && ["Enter", " "].includes(event.key)) startAmbient();
+        if (ambientEnabled && ["Enter", " "].includes(event.key) && !event.target.closest("#ambient-toggle")) startAmbient();
       }, true);
 
       document.addEventListener("visibilitychange", () => {
