@@ -161,27 +161,41 @@
         audioContext ??= new AudioContextClass();
         if (audioContext.state === "suspended") audioContext.resume();
         const now = audioContext.currentTime;
-        const notes = [
-          { frequency: 146.83, level: .011 },
-          { frequency: 220, level: .0048 },
-          { frequency: 329.63, level: .0018 }
-        ];
-        notes.forEach(({ frequency, level }, index) => {
-          [0, .14].forEach((echoDelay, echoIndex) => {
-            const start = now + index * .012 + echoDelay;
-            const tone = audioContext.createOscillator();
-            const volume = audioContext.createGain();
-            tone.type = "sine";
-            tone.frequency.setValueAtTime(frequency, start);
-            tone.frequency.exponentialRampToValueAtTime(frequency * 1.025, start + .28);
-            volume.gain.setValueAtTime(.0001, start);
-            volume.gain.exponentialRampToValueAtTime(level * (echoIndex ? .18 : 1), start + .045);
-            volume.gain.exponentialRampToValueAtTime(.0001, start + .42);
-            tone.connect(volume);
-            volume.connect(audioContext.destination);
-            tone.start(start);
-            tone.stop(start + .44);
-          });
+        const master = audioContext.createGain();
+        const delay = audioContext.createDelay(1);
+        const echo = audioContext.createGain();
+        const filter = audioContext.createBiquadFilter();
+        master.gain.setValueAtTime(.72, now);
+        delay.delayTime.setValueAtTime(.38, now);
+        echo.gain.setValueAtTime(.22, now);
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(1100, now);
+        master.connect(filter);
+        filter.connect(audioContext.destination);
+        master.connect(delay);
+        delay.connect(echo);
+        echo.connect(filter);
+
+        [
+          { frequency: 110, level: .16, duration: 1.45 },
+          { frequency: 164.81, level: .075, duration: 1.2 },
+          { frequency: 220, level: .035, duration: .9 },
+          { frequency: 330, level: .012, duration: .72 }
+        ].forEach(({ frequency, level, duration }, index) => {
+          const tone = audioContext.createOscillator();
+          const voice = audioContext.createGain();
+          const start = now + index * .055;
+          tone.type = index === 0 ? "triangle" : "sine";
+          tone.frequency.setValueAtTime(frequency * .985, start);
+          tone.frequency.exponentialRampToValueAtTime(frequency, start + .42);
+          voice.gain.setValueAtTime(.0001, start);
+          voice.gain.exponentialRampToValueAtTime(level, start + .22);
+          voice.gain.setValueAtTime(level, start + .34);
+          voice.gain.exponentialRampToValueAtTime(.0001, start + duration);
+          tone.connect(voice);
+          voice.connect(master);
+          tone.start(start);
+          tone.stop(start + duration + .03);
         });
       };
 
