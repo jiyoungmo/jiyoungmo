@@ -1,4 +1,4 @@
-<!-- 업데이트 시점: 2026-11-23 15:44 KST -->
+<!-- 업데이트 시점: 2026-11-23 15:48 KST -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -157,6 +157,7 @@
       const ambientToggle = document.getElementById("ambient-toggle");
       const ambientPreferenceKey = "jiyoungmo-ambient-sound";
       let ambientEnabled = true;
+      let ambientStarted = false;
       let audioContext;
       let ambientGain;
       let ambientVoices = [];
@@ -168,15 +169,21 @@
       body.classList.add("enhanced");
 
       const updateAmbientControl = () => {
-        ambientToggle.setAttribute("aria-pressed", String(ambientEnabled));
-      ambientToggle.setAttribute("aria-label", ambientEnabled ? "Turn ambient sound off" : "Turn ambient sound on");
-      ambientToggle.textContent = ambientEnabled ? "♫ Ambient on" : "♫ Ambient off";
+        const label = !ambientEnabled ? "off" : ambientStarted ? "on" : "ready";
+        ambientToggle.setAttribute("aria-pressed", String(ambientEnabled && ambientStarted));
+        ambientToggle.setAttribute("aria-label", !ambientEnabled ? "Turn ambient sound on" : ambientStarted ? "Turn ambient sound off" : "Start ambient sound");
+        ambientToggle.textContent = `♫ Ambient ${label}`;
       };
 
       const startAmbient = () => {
         if (!AudioContextClass || !ambientEnabled) return;
         audioContext ??= new AudioContextClass();
-        audioContext.resume().catch(() => {});
+        audioContext.resume().then(() => {
+          if (ambientEnabled && ambientGain) {
+            ambientStarted = true;
+            updateAmbientControl();
+          }
+        }).catch(() => {});
         const now = audioContext.currentTime;
         if (ambientGain) {
           window.clearTimeout(ambientStopTimer);
@@ -233,12 +240,19 @@
           ambientVoices = [];
           ambientGain = null;
           ambientLfo = null;
+          ambientStarted = false;
+          updateAmbientControl();
         }, 750);
       };
 
       updateAmbientControl();
       ambientToggle.addEventListener("click", () => {
+        if (ambientEnabled && !ambientStarted) {
+          startAmbient();
+          return;
+        }
         ambientEnabled = !ambientEnabled;
+        if (!ambientEnabled) ambientStarted = false;
         try { localStorage.setItem(ambientPreferenceKey, ambientEnabled ? "on" : "off"); } catch {}
         updateAmbientControl();
         if (ambientEnabled) startAmbient();
