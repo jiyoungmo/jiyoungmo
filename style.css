@@ -1,4 +1,4 @@
-/* 업데이트 시점: 2026-11-23 15:48 KST */
+/* 업데이트 시점: 2026-11-24 08:40 KST */
 
 :root {
   color-scheme: light;
@@ -618,3 +618,50 @@ body[data-signal] .atlas-thread-path { stroke: rgba(var(--signal-rgb), .82); str
 @media (max-width: 760px) {
   .sound-toggle { font-size: 10px; padding: 6px 8px; }
 }
+
+
+.language-toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 6px 9px;
+  border: 1px solid rgba(155, 200, 255, .28);
+  border-radius: 999px;
+  color: #dce8ff;
+  background: rgba(17, 24, 42, .58);
+  font: 11px/1.2 var(--sans);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.language-toggle:hover, .language-toggle:focus-visible { border-color: var(--accent); color: #fff; }
+.language-toggle:focus-visible { outline: 2px solid var(--accent-secondary); outline-offset: 3px; }
+html[lang="ko"] body { font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", var(--sans); word-break: keep-all; }
+@media (max-width: 760px) { .language-toggle { font-size: 10px; padding: 6px 8px; } }
+
+/* Korean typography keeps the English page's crisp, bold sans-serif character. */
+html[lang="ko"] {
+  --ko-sans: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Noto Sans CJK KR", sans-serif;
+}
+html[lang="ko"] body,
+html[lang="ko"] .wordmark,
+html[lang="ko"] nav a,
+html[lang="ko"] h1,
+html[lang="ko"] h2,
+html[lang="ko"] h3,
+html[lang="ko"] .eyebrow,
+html[lang="ko"] .background-entry strong,
+html[lang="ko"] footer,
+html[lang="ko"] .interaction-status,
+html[lang="ko"] .sound-toggle,
+html[lang="ko"] .language-toggle,
+html[lang="ko"] .atlas-reset,
+html[lang="ko"] .atlas-node {
+  font-family: var(--ko-sans);
+}
+html[lang="ko"] .eyebrow { letter-spacing: .06em; font-size: 12px; }
+html[lang="ko"] h1 { font-size: clamp(48px, 6.2vw, 68px); font-weight: 700; letter-spacing: -.05em; }
+html[lang="ko"] .section h2, html[lang="ko"] .contact-band h2 { font-weight: 700; letter-spacing: -.04em; }
+html[lang="ko"] .background-entry strong { font-size: 14px; font-weight: 650; }
+html[lang="ko"] footer { font-size: 12px; }
+html[lang="ko"] nav a { font-size: 13px; letter-spacing: -.02em; }
+html[lang="ko"] .language-toggle, html[lang="ko"] .sound-toggle { font-size: 12px; }
