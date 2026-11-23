@@ -1,4 +1,4 @@
-/* 업데이트 시점: 2026-11-23 00:01 KST */
+/* 업데이트 시점: 2026-11-23 15:26 KST */
 
 :root {
   color-scheme: light;
@@ -597,4 +597,7 @@ body[data-signal] .atlas-thread-path { stroke: rgba(var(--signal-rgb), .82); str
 @media (max-width: 760px) {
   .research-summary, .journey-item summary { grid-template-columns: 24px minmax(0, 1fr) 24px; gap: 12px; }
   .research-detail, .journey-detail { margin-left: 36px; padding-left: 0; }
+}
+@media (pointer: fine) {
+  .atlas-stage, .atlas-node { cursor: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2228%22 height=%2228%22 viewBox=%220 0 28 28%22%3E%3Ccircle cx=%2214%22 cy=%2214%22 r=%229%22 fill=%22%23080b18%22 fill-opacity=%22.35%22 stroke=%22%239bc8ff%22 stroke-width=%221.2%22/%3E%3Cpath d=%22M14 1.5v6m0 13v6M1.5 14h6m13 0h6%22 stroke=%22%23d9b783%22 stroke-width=%221.2%22/%3E%3Ccircle cx=%2214%22 cy=%2214%22 r=%221.5%22 fill=%22%23edf2ff%22/%3E%3C/svg%3E") 14 14, crosshair; }
 }

@@ -1,4 +1,4 @@
-<!-- 업데이트 시점: 2026-11-23 00:01 KST -->
+<!-- 업데이트 시점: 2026-11-23 15:26 KST -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -152,7 +152,32 @@
       const progress = document.getElementById("scroll-progress");
       const status = document.getElementById("interaction-status");
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      let audioContext;
       body.classList.add("enhanced");
+
+      const playSoftClick = () => {
+        if (!AudioContextClass) return;
+        audioContext ??= new AudioContextClass();
+        if (audioContext.state === "suspended") audioContext.resume();
+        const now = audioContext.currentTime;
+        const tone = audioContext.createOscillator();
+        const volume = audioContext.createGain();
+        tone.type = "sine";
+        tone.frequency.setValueAtTime(620, now);
+        tone.frequency.exponentialRampToValueAtTime(820, now + .055);
+        volume.gain.setValueAtTime(.0001, now);
+        volume.gain.exponentialRampToValueAtTime(.018, now + .008);
+        volume.gain.exponentialRampToValueAtTime(.0001, now + .085);
+        tone.connect(volume);
+        volume.connect(audioContext.destination);
+        tone.start(now);
+        tone.stop(now + .09);
+      };
+
+      document.addEventListener("click", (event) => {
+        if (event.target.closest("a, button, summary")) playSoftClick();
+      }, true);
 
       const researchCards = [...document.querySelectorAll(".research-card")];
       const atlasNodes = [...document.querySelectorAll(".atlas-node")];
