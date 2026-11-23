@@ -1,4 +1,4 @@
-<!-- 업데이트 시점: 2026-11-23 15:30 KST -->
+<!-- 업데이트 시점: 2026-11-23 16:02 KST -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -15,7 +15,7 @@
   <meta property="og:image" content="https://jiyoungmo.github.io/jiyoungmo/profile.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <title>Jiyoung Mo | Computational Social Science</title>
-  <link rel="stylesheet" href="style.css?v=20261122">
+  <link rel="stylesheet" href="style.css?v=20261123-audio">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -48,6 +48,7 @@
       <a href="#background">Background</a>
       <a href="#projects">Projects</a>
       <a href="mailto:jiyoungmo@kaist.ac.kr">Contact</a>
+      <button class="sound-toggle" id="ambient-toggle" type="button" aria-pressed="true" aria-label="Turn ambient sound off">♫ Sound on</button>
     </nav>
   </header>
 
@@ -153,23 +154,111 @@
       const status = document.getElementById("interaction-status");
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      const ambientToggle = document.getElementById("ambient-toggle");
+      const ambientPreferenceKey = "jiyoungmo-ambient-sound";
+      let ambientEnabled = true;
       let audioContext;
+      let ambientGain;
+      let ambientVoices = [];
+      let ambientLfo;
+      let ambientStopTimer;
+      try {
+        ambientEnabled = localStorage.getItem(ambientPreferenceKey) !== "off";
+      } catch {}
       body.classList.add("enhanced");
+
+      const updateAmbientControl = () => {
+        ambientToggle.setAttribute("aria-pressed", String(ambientEnabled));
+      ambientToggle.setAttribute("aria-label", ambientEnabled ? "Turn ambient sound off" : "Turn ambient sound on");
+      ambientToggle.textContent = ambientEnabled ? "♫ Ambient on" : "♫ Ambient off";
+      };
+
+      const startAmbient = () => {
+        if (!AudioContextClass || !ambientEnabled) return;
+        audioContext ??= new AudioContextClass();
+        audioContext.resume().catch(() => {});
+        const now = audioContext.currentTime;
+        if (ambientGain) {
+          window.clearTimeout(ambientStopTimer);
+          ambientGain.gain.cancelScheduledValues(now);
+          ambientGain.gain.setTargetAtTime(.045, now, .5);
+          return;
+        }
+        ambientGain = audioContext.createGain();
+        const toneFilter = audioContext.createBiquadFilter();
+        toneFilter.type = "lowpass";
+        toneFilter.frequency.setValueAtTime(1250, now);
+        ambientGain.gain.setValueAtTime(.0001, now);
+        ambientGain.gain.exponentialRampToValueAtTime(.045, now + 2.4);
+        ambientGain.connect(toneFilter);
+        toneFilter.connect(audioContext.destination);
+
+        ambientLfo = audioContext.createOscillator();
+        const drift = audioContext.createGain();
+        ambientLfo.type = "sine";
+        ambientLfo.frequency.setValueAtTime(.075, now);
+        drift.gain.setValueAtTime(4, now);
+        ambientLfo.connect(drift);
+        ambientLfo.start(now);
+
+        [
+          { frequency: 110, level: .20, type: "triangle" },
+          { frequency: 164.81, level: .12, type: "sine" },
+          { frequency: 220, level: .09, type: "sine" },
+          { frequency: 329.63, level: .045, type: "sine" },
+          { frequency: 440, level: .018, type: "sine" }
+        ].forEach(({ frequency, level, type }, index) => {
+          const tone = audioContext.createOscillator();
+          const voice = audioContext.createGain();
+          tone.type = type;
+          tone.frequency.setValueAtTime(frequency, now);
+          tone.detune.setValueAtTime(index % 2 ? -2 : 2, now);
+          drift.connect(tone.detune);
+          voice.gain.setValueAtTime(level, now);
+          tone.connect(voice);
+          voice.connect(ambientGain);
+          tone.start(now);
+          ambientVoices.push(tone);
+        });
+      };
+
+      const stopAmbient = () => {
+        if (!ambientGain) return;
+        const now = audioContext.currentTime;
+        ambientGain.gain.cancelScheduledValues(now);
+        ambientGain.gain.setTargetAtTime(.0001, now, .16);
+        ambientStopTimer = window.setTimeout(() => {
+          ambientVoices.forEach((voice) => { try { voice.stop(); } catch {} });
+          try { ambientLfo.stop(); } catch {}
+          ambientVoices = [];
+          ambientGain = null;
+          ambientLfo = null;
+        }, 750);
+      };
+
+      updateAmbientControl();
+      ambientToggle.addEventListener("click", () => {
+        ambientEnabled = !ambientEnabled;
+        try { localStorage.setItem(ambientPreferenceKey, ambientEnabled ? "on" : "off"); } catch {}
+        updateAmbientControl();
+        if (ambientEnabled) startAmbient();
+        else stopAmbient();
+      });
 
       const playSoftClick = () => {
         if (!AudioContextClass) return;
         audioContext ??= new AudioContextClass();
-        if (audioContext.state === "suspended") audioContext.resume();
+        if (audioContext.state === "suspended") audioContext.resume().catch(() => {});
         const now = audioContext.currentTime;
         const master = audioContext.createGain();
         const delay = audioContext.createDelay(1);
         const echo = audioContext.createGain();
         const filter = audioContext.createBiquadFilter();
-        master.gain.setValueAtTime(.72, now);
-        delay.delayTime.setValueAtTime(.38, now);
-        echo.gain.setValueAtTime(.22, now);
+        master.gain.setValueAtTime(.48, now);
+        delay.delayTime.setValueAtTime(.12, now);
+        echo.gain.setValueAtTime(.14, now);
         filter.type = "lowpass";
-        filter.frequency.setValueAtTime(1100, now);
+        filter.frequency.setValueAtTime(1800, now);
         master.connect(filter);
         filter.connect(audioContext.destination);
         master.connect(delay);
@@ -177,20 +266,18 @@
         echo.connect(filter);
 
         [
-          { frequency: 110, level: .16, duration: 1.45 },
-          { frequency: 164.81, level: .075, duration: 1.2 },
-          { frequency: 220, level: .035, duration: .9 },
-          { frequency: 330, level: .012, duration: .72 }
+          { frequency: 220, level: .09, duration: .24 },
+          { frequency: 329.63, level: .045, duration: .21 },
+          { frequency: 440, level: .025, duration: .18 }
         ].forEach(({ frequency, level, duration }, index) => {
           const tone = audioContext.createOscillator();
           const voice = audioContext.createGain();
           const start = now + index * .055;
           tone.type = index === 0 ? "triangle" : "sine";
-          tone.frequency.setValueAtTime(frequency * .985, start);
-          tone.frequency.exponentialRampToValueAtTime(frequency, start + .42);
+          tone.frequency.setValueAtTime(frequency * .99, start);
+          tone.frequency.exponentialRampToValueAtTime(frequency, start + .055);
           voice.gain.setValueAtTime(.0001, start);
-          voice.gain.exponentialRampToValueAtTime(level, start + .22);
-          voice.gain.setValueAtTime(level, start + .34);
+          voice.gain.exponentialRampToValueAtTime(level, start + .012);
           voice.gain.exponentialRampToValueAtTime(.0001, start + duration);
           tone.connect(voice);
           voice.connect(master);
@@ -200,8 +287,25 @@
       };
 
       document.addEventListener("click", (event) => {
-        if (event.target.closest("a, button, summary")) playSoftClick();
+        if (event.target.closest("a, button, summary")) {
+          if (event.target.closest("#ambient-toggle")) return;
+          if (ambientEnabled) startAmbient();
+          playSoftClick();
+        }
       }, true);
+
+      document.addEventListener("pointerdown", (event) => {
+        if (ambientEnabled && !event.target.closest("#ambient-toggle")) startAmbient();
+      }, { capture: true, passive: true });
+
+      document.addEventListener("keydown", (event) => {
+        if (ambientEnabled && ["Enter", " "].includes(event.key)) startAmbient();
+      }, true);
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden && audioContext?.state === "running") audioContext.suspend();
+        else if (!document.hidden && ambientEnabled && ambientGain) audioContext.resume().catch(() => {});
+      });
 
       const researchCards = [...document.querySelectorAll(".research-card")];
       const atlasNodes = [...document.querySelectorAll(".atlas-node")];

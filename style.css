@@ -1,4 +1,4 @@
-/* 업데이트 시점: 2026-11-23 15:26 KST */
+/* 업데이트 시점: 2026-11-23 16:02 KST */
 
 :root {
   color-scheme: light;
@@ -600,4 +600,21 @@ body[data-signal] .atlas-thread-path { stroke: rgba(var(--signal-rgb), .82); str
 }
 @media (pointer: fine) {
   .atlas-stage, .atlas-node { cursor: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2228%22 height=%2228%22 viewBox=%220 0 28 28%22%3E%3Ccircle cx=%2214%22 cy=%2214%22 r=%229%22 fill=%22%23080b18%22 fill-opacity=%22.35%22 stroke=%22%239bc8ff%22 stroke-width=%221.2%22/%3E%3Cpath d=%22M14 1.5v6m0 13v6M1.5 14h6m13 0h6%22 stroke=%22%23d9b783%22 stroke-width=%221.2%22/%3E%3Ccircle cx=%2214%22 cy=%2214%22 r=%221.5%22 fill=%22%23edf2ff%22/%3E%3C/svg%3E") 14 14, crosshair; }
+}
+
+.sound-toggle {
+  flex: 0 0 auto;
+  padding: 6px 9px;
+  border: 1px solid rgba(155, 200, 255, .28);
+  border-radius: 999px;
+  color: #dce8ff;
+  background: rgba(17, 24, 42, .58);
+  font: 11px/1.2 var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.sound-toggle:hover, .sound-toggle:focus-visible { border-color: var(--accent); color: #fff; }
+.sound-toggle:focus-visible { outline: 2px solid var(--accent-secondary); outline-offset: 3px; }
+@media (max-width: 760px) {
+  .sound-toggle { font-size: 10px; padding: 6px 8px; }
 }
