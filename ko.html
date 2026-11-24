@@ -1,4 +1,4 @@
-<!-- 업데이트 시점: 2026-11-24 09:30 KST -->
+<!-- 업데이트 시점: 2026-11-24 10:05 KST -->
 <!doctype html>
 <html lang="ko">
 <head>
@@ -53,7 +53,6 @@
       <a href="#projects">진행 중인 프로젝트</a>
       <a href="mailto:jiyoungmo@kaist.ac.kr">연락하기</a>
       <a class="language-toggle" lang="en" href="index.html">English</a>
-      <button class="sound-toggle" id="ambient-toggle" type="button" aria-pressed="true" aria-label="배경음악 시작">♫ 배경음 준비</button>
     </nav>
   </header>
 
@@ -159,8 +158,6 @@
       const status = document.getElementById("interaction-status");
       const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      const ambientToggle = document.getElementById("ambient-toggle");
-      const ambientPreferenceKey = "jiyoungmo-ambient-sound";
       let ambientEnabled = true;
       let ambientStarted = false;
       let audioContext;
@@ -168,17 +165,7 @@
       let ambientVoices = [];
       let ambientLfo;
       let ambientStopTimer;
-      try {
-        ambientEnabled = localStorage.getItem(ambientPreferenceKey) !== "off";
-      } catch {}
       body.classList.add("enhanced");
-
-      const updateAmbientControl = () => {
-        const label = !ambientEnabled ? "off" : ambientStarted ? "on" : "ready";
-        ambientToggle.setAttribute("aria-pressed", String(ambientEnabled && ambientStarted));
-        ambientToggle.setAttribute("aria-label", !ambientEnabled ? "배경음악 켜기" : ambientStarted ? "배경음악 끄기" : "배경음악 시작");
-        ambientToggle.textContent = `♫ 배경음 ${label === "off" ? "꺼짐" : label === "on" ? "켜짐" : "준비"}`;
-      };
 
       const startAmbient = () => {
         if (!AudioContextClass || !ambientEnabled) return;
@@ -186,7 +173,6 @@
         audioContext.resume().then(() => {
           if (ambientEnabled && ambientGain) {
             ambientStarted = true;
-            updateAmbientControl();
           }
         }).catch(() => {});
         const now = audioContext.currentTime;
@@ -246,23 +232,20 @@
           ambientGain = null;
           ambientLfo = null;
           ambientStarted = false;
-          updateAmbientControl();
         }, 750);
       };
 
-      updateAmbientControl();
-      ambientToggle.addEventListener("click", () => {
-        if (ambientEnabled && !ambientStarted) {
-          startAmbient();
-          return;
-        }
-        ambientEnabled = !ambientEnabled;
-        if (!ambientEnabled) ambientStarted = false;
-        try { localStorage.setItem(ambientPreferenceKey, ambientEnabled ? "on" : "off"); } catch {}
-        updateAmbientControl();
-        if (ambientEnabled) startAmbient();
-        else stopAmbient();
-      });
+      const beginAmbientPlayback = () => {
+        if (!AudioContextClass) return;
+        startAmbient();
+        window.removeEventListener("pointerdown", beginAmbientPlayback, true);
+        window.removeEventListener("keydown", beginAmbientPlayback, true);
+      };
+      if (AudioContextClass) {
+        window.addEventListener("pointerdown", beginAmbientPlayback, { capture: true, once: true, passive: true });
+        window.addEventListener("keydown", beginAmbientPlayback, { capture: true, once: true });
+        startAmbient();
+      }
 
       const playSoftClick = () => {
         if (!AudioContextClass) return;
@@ -307,18 +290,17 @@
 
       document.addEventListener("click", (event) => {
         if (event.target.closest("a, button, summary")) {
-          if (event.target.closest("#ambient-toggle")) return;
           if (ambientEnabled) startAmbient();
           playSoftClick();
         }
       }, true);
 
       document.addEventListener("pointerdown", (event) => {
-        if (ambientEnabled && !event.target.closest("#ambient-toggle")) startAmbient();
+        if (ambientEnabled) startAmbient();
       }, { capture: true, passive: true });
 
       document.addEventListener("keydown", (event) => {
-        if (ambientEnabled && ["Enter", " "].includes(event.key) && !event.target.closest("#ambient-toggle")) startAmbient();
+        if (ambientEnabled && ["Enter", " "].includes(event.key)) startAmbient();
       }, true);
 
       document.addEventListener("visibilitychange", () => {
