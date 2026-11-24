@@ -1,4 +1,4 @@
-<!-- 업데이트 시점: 2026-11-24 10:05 KST -->
+<!-- 업데이트 시점: 2026-11-24 10:35 KST -->
 <!doctype html>
 <html lang="ko">
 <head>
@@ -242,6 +242,7 @@
         window.removeEventListener("keydown", beginAmbientPlayback, true);
       };
       if (AudioContextClass) {
+        document.getElementById("ambient-toggle")?.remove();
         window.addEventListener("pointerdown", beginAmbientPlayback, { capture: true, once: true, passive: true });
         window.addEventListener("keydown", beginAmbientPlayback, { capture: true, once: true });
         startAmbient();
